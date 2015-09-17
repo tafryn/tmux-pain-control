@@ -40,6 +40,15 @@ set_keys() {
 	CAP_RIGHT=$(echo ${RIGHT} | awk '{print toupper($0)}')
 }
 
+key_binding_not_set() {
+    local key="$1"
+    if $(tmux list-keys | grep -q "${KEY_BINDING_REGEX}${key}[[:space:]]"); then
+        return 1
+    else
+        return 0
+    fi
+}
+
 # tmux show-option "q" (quiet) flag does not set return value to 1, even though
 # the option does not exist. This function patches that.
 get_tmux_option() {
@@ -55,13 +64,22 @@ get_tmux_option() {
 
 pane_navigation_bindings() {
 	tmux bind-key $LEFT   select-pane -L
-	tmux bind-key C-$LEFT select-pane -L
 	tmux bind-key $DOWN   select-pane -D
-	tmux bind-key C-$DOWN select-pane -D
 	tmux bind-key $UP   select-pane -U
-	tmux bind-key C-$UP select-pane -U
 	tmux bind-key $RIGHT   select-pane -R
-	tmux bind-key C-$RIGHT select-pane -R
+
+    if key_binding_not_set "C-$LEFT"; then
+        tmux bind-key C-$LEFT select-pane -L
+    fi
+    if key_binding_not_set "C-$DOWN"; then
+        tmux bind-key C-$DOWN select-pane -D
+    fi
+    if key_binding_not_set "C-$UP"; then
+        tmux bind-key C-$UP select-pane -U
+    fi
+    if key_binding_not_set "C-$RIGHT"; then
+        tmux bind-key C-$RIGHT select-pane -R
+    fi
 }
 
 window_move_bindings() {
